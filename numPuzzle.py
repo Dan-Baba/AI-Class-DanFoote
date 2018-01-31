@@ -2,10 +2,10 @@ import copy
 import heapq
 
 class Agent:
-    steps = 0
     priority_queue = []
     def __init__(self, board, goal):
         self.goal = goal
+        self.steps = 0
         self.expand_node(Node(board, [], 0))
 
     def solve(self):
@@ -20,6 +20,7 @@ class Agent:
     def expand_node(self, node):
         list_moves = possible_moves(node.board)
         for move in list_moves:
+            self.steps += 1
             new_moves = copy.deepcopy(node.actions)
             new_moves.append(move)
             new_board = copy.deepcopy(node.board)
@@ -123,14 +124,26 @@ def heuristic(board, goal):
         for y in range(board.size):
             if (board.board[y][x] != " "):
                 target_loc = find_tile(goal, board.board[y][x])
+                # Check horizontal, if it's supposed to be to left of item, it takes more turns to get it to correct position.
+                for tile in goal.board[y]:
+                     if (find_in_list(tile, board.board[y]) > x and goal.board[y].index(tile) < x):
+                         heuristic_total += 3 # It takes minimum of 2 turns to swap them? Maybe 3 or 4
                 heuristic_total += abs(target_loc.x - x) + abs(target_loc.y - y)
     return heuristic_total
+
+def find_in_list(element, list):
+    try:
+        index = list.index(element)
+        return index
+    except ValueError:
+        return -1
 
 # "1234567890!@#$%^&*()-=_+ "
 test = Board(3, "36274518 ")
 test_goal = Board(3, "12345678 ")
 test_agent = Agent(test, test_goal)
 print (test_agent.solve())
+print (str(test_agent.steps) + " nodes expanded")
 # test = Board(3, "64538127 ")
 # test_goal = Board(3, "12345678 ")
 # test_agent = Agent(test, test_goal)
