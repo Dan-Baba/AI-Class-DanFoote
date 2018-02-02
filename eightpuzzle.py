@@ -141,6 +141,20 @@ def linear_conflict_heuristic(board, goal):
                 heuristic_total += abs(target_loc.x - x) + abs(target_loc.y - y)
     return heuristic_total
 
+def out_row_and_column_heuristic(board, goal):
+    heuristic_total = 0
+    for x in range(board.size):
+        for y in range(board.size):
+            if (board.board[y][x] != " "):
+                target_loc = find_tile(goal, board.board[y][x])
+                # If not in right row or column, increment.
+                if (target_loc.x != x):
+                    heuristic_total += 1
+                if (target_loc.y != y):
+                    heuristic_total += 1
+    return heuristic_total
+
+
 def find_in_list(element, list):
     try:
         index = list.index(element)
