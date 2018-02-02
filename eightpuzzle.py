@@ -13,7 +13,6 @@ class Agent:
             if (heuristic(self.priority_queue[0].board, self.goal) == 0):
                 return self.priority_queue[0].actions
             self.expand_node(heapq.heappop(self.priority_queue))
-            print(self.priority_queue[0].heuristic)
             print(self.priority_queue[0].board)
 
 
@@ -25,9 +24,9 @@ class Agent:
             new_moves.append(move)
             new_board = copy.deepcopy(node.board)
             new_board = do_move(new_board, move)
+            # Total heuristic should account for moves
             new_heuristic = heuristic(new_board, self.goal) + len(new_moves)
             heapq.heappush(self.priority_queue, Node(new_board, new_moves, new_heuristic))
-            #self.priority_queue.append(Node(new_board, new_moves, new_heuristic))
 
 class Node:
     def __init__(self, board, actions, heuristic):
@@ -50,6 +49,7 @@ class Board:
         self.size = size
         self.board = []
         
+        #Load the board in a 2D array
         for x in range(size):
             self.board.append(list(board[x*size:(x+1)*size]))
 
@@ -61,6 +61,7 @@ class Board:
             message += "\n"
         return message
 
+# I could have just returned x and y, but I wanted to contain results a little better...
 class Coords:
     """Container for x y coords on the board"""
     def __init__(self, x, y):
@@ -124,6 +125,15 @@ def heuristic(board, goal):
         for y in range(board.size):
             if (board.board[y][x] != " "):
                 target_loc = find_tile(goal, board.board[y][x])
+                heuristic_total += abs(target_loc.x - x) + abs(target_loc.y - y)
+    return heuristic_total
+
+def linear_conflict_heuristic(board, goal):
+    heuristic_total = 0
+    for x in range(board.size):
+        for y in range(board.size):
+            if (board.board[y][x] != " "):
+                target_loc = find_tile(goal, board.board[y][x])
                 # Check horizontal, if it's supposed to be to left of item, it takes more turns to get it to correct position.
                 for tile in goal.board[y]:
                      if (find_in_list(tile, board.board[y]) > x and goal.board[y].index(tile) < x):
@@ -138,13 +148,11 @@ def find_in_list(element, list):
     except ValueError:
         return -1
 
-# "1234567890!@#$%^&*()-=_+ "
-test = Board(3, "36274518 ")
-test_goal = Board(3, "12345678 ")
-test_agent = Agent(test, test_goal)
-print (test_agent.solve())
-print (str(test_agent.steps) + " nodes expanded")
-# test = Board(3, "64538127 ")
-# test_goal = Board(3, "12345678 ")
-# test_agent = Agent(test, test_goal)
-# print (test_agent.solve())
+# 3x3 is the only size that seems to work reliably.
+puzzle_size = int(input("What size of puzzle do you want to solve?"))
+starting_board = Board(puzzle_size, input("Please input starting state (1 character per tile, space for blank)"))
+goal_board = Board(puzzle_size, input("Please input the final state desired (1 character per tile, space for blank)"))
+agent = Agent(starting_board, goal_board)
+print ("Trying to solve...")
+print (agent.solve())
+print (str(agent.steps) + " nodes expanded")
