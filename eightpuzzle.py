@@ -1,6 +1,8 @@
 import copy
 import heapq
 
+
+
 class Agent:
     priority_queue = []
     def __init__(self, board, goal):
@@ -48,10 +50,16 @@ class Board:
     def __init__(self, size, board):
         self.size = size
         self.board = []
+        inboard = ""
+        for tile in board:
+            if (tile == "0"):
+                inboard += " "
+            else:
+                inboard += tile 
         
         #Load the board in a 2D array
         for x in range(size):
-            self.board.append(list(board[x*size:(x+1)*size]))
+            self.board.append(list(inboard[x*size:(x+1)*size]))
 
     def __str__(self):
         message = ""
@@ -70,12 +78,27 @@ class Coords:
     def __str__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
-from enum import Enum
-class Move(Enum):
-    UP = 1
-    RIGHT = 2
-    DOWN = 3
-    LEFT = 4
+# Replaced enum with combo of Direction and Move classes, so that I can use it as Move.UP and yet have it represent itself in a list in a human readable way.
+class Direction:
+    def __init__(self, direction):
+        self.direction = direction 
+    def __str__(self):
+        if (self.direction == 1):
+            return "UP"
+        elif (self.direction == 2):
+            return "RIGHT"
+        elif (self.direction == 3):
+            return "DOWN"
+        elif (self.direction == 4):
+            return "LEFT"
+    def __repr__(self):
+        return str(self)
+
+class Move:
+    UP = Direction(1)
+    RIGHT = Direction(2)
+    DOWN = Direction(3)
+    LEFT = Direction(4)
 
 def possible_moves(board):
     spaceLoc = find_tile(board, " ")
@@ -162,11 +185,16 @@ def find_in_list(element, list):
     except ValueError:
         return -1
 
+
 # 3x3 is the only size that seems to work reliably.
 puzzle_size = int(input("What size of puzzle do you want to solve?"))
-starting_board = Board(puzzle_size, input("Please input starting state (1 character per tile, space for blank)"))
-goal_board = Board(puzzle_size, input("Please input the final state desired (1 character per tile, space for blank)"))
-agent = Agent(starting_board, goal_board)
-print ("Trying to solve...")
-print (agent.solve())
-print (str(agent.steps) + " nodes expanded")
+starting_board = Board(puzzle_size, str(input("Please input starting state (1 character per tile, 0 for blank)")))
+goal_board = Board(puzzle_size, str(input("Please input the final state desired (1 character per tile, 0 for blank)")))
+print ("Starting Board")
+print (starting_board)
+print ("Goal Board")
+print (goal_board)
+# agent = Agent(starting_board, goal_board)
+# print ("Trying to solve...")
+# print (agent.solve())
+# print (str(agent.steps) + " nodes expanded")
