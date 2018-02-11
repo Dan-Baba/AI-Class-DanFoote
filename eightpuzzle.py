@@ -1,3 +1,4 @@
+import sys
 import copy
 import heapq
 
@@ -20,6 +21,9 @@ class Agent:
 
     def expand_node(self, node):
         list_moves = possible_moves(node.board)
+        if (node.actions):
+            remove_backtrack(list_moves, node.actions[len(node.actions) - 1])
+
         for move in list_moves:
             self.steps += 1
             new_moves = copy.deepcopy(node.actions)
@@ -185,15 +189,31 @@ def find_in_list(element, list):
     except ValueError:
         return -1
 
+# If the opposite of the last action performed is in the potential actions, remove it.
+def remove_backtrack(potential_actions, last_action):
+    if (last_action == Move.UP):
+        action = Move.DOWN
+    elif (last_action == Move.RIGHT):
+        action = Move.LEFT
+    elif (last_action == Move.DOWN):
+        action = Move.UP
+    elif (last_action == Move.LEFT):
+        action = Move.RIGHT
+    
+    for i in range(len(potential_actions)):
+        if (last_action and potential_actions[i] == action):
+            del potential_actions[i]
+            return
 
+print(Board(3, sys.argv[1:10]))
+print(Board(3, sys.argv[10:]))
 # 3x3 is the only size that seems to work reliably.
-puzzle_size = int(input("What size of puzzle do you want to solve?"))
-starting_board = Board(puzzle_size, str(input("Please input starting state (1 character per tile, 0 for blank)")))
-goal_board = Board(puzzle_size, str(input("Please input the final state desired (1 character per tile, 0 for blank)")))
-print ("Starting Board")
-print (starting_board)
-print ("Goal Board")
-print (goal_board)
+# starting_board = Board(puzzle_size, str(input("Please input starting state (1 character per tile, 0 for blank)")))
+# goal_board = Board(puzzle_size, str(input("Please input the final state desired (1 character per tile, 0 for blank)")))
+# print ("Starting Board")
+# print (starting_board)
+# print ("Goal Board")
+# print (goal_board)
 # agent = Agent(starting_board, goal_board)
 # print ("Trying to solve...")
 # print (agent.solve())
