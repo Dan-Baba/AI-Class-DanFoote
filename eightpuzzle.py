@@ -9,14 +9,13 @@ class Agent:
     def __init__(self, board, goal):
         self.goal = goal
         self.steps = 0
-        self.expand_node(Node(board, [], 0))
+        self.expand_node(Node(board, [], [], 0))
 
     def solve(self):
         while True:
             if (heuristic(self.priority_queue[0].board, self.goal) == 0):
-                return self.priority_queue[0].actions
+                return self.priority_queue[0].display_actions
             self.expand_node(heapq.heappop(self.priority_queue))
-            print(self.priority_queue[0].board)
 
 
     def expand_node(self, node):
@@ -28,17 +27,20 @@ class Agent:
             self.steps += 1
             new_moves = copy.deepcopy(node.actions)
             new_moves.append(move)
+            display_moves = copy.deepcopy(node.display_actions)
             new_board = copy.deepcopy(node.board)
-            new_board = do_move(new_board, move)
+            new_board, piece_moved = do_move(new_board, move)
+            display_moves.append((piece_moved, invert_move(move)))
             # Total heuristic should account for moves
             new_heuristic = heuristic(new_board, self.goal) + len(new_moves)
-            heapq.heappush(self.priority_queue, Node(new_board, new_moves, new_heuristic))
+            heapq.heappush(self.priority_queue, Node(new_board, new_moves, display_moves, new_heuristic))
 
 class Node:
-    def __init__(self, board, actions, heuristic):
+    def __init__(self, board, actions, display_actions, heuristic):
         self.board = board
         self.actions = actions
         self.heuristic = heuristic
+        self.display_actions = display_actions
 
     def __str__(self):
         return self.board + "\nBy taking actions: " + self.actions
@@ -87,22 +89,27 @@ class Direction:
     def __init__(self, direction):
         self.direction = direction 
     def __str__(self):
-        if (self.direction == 1):
+        if (self.direction == 0):
             return "UP"
-        elif (self.direction == 2):
+        elif (self.direction == 1):
             return "RIGHT"
-        elif (self.direction == 3):
+        elif (self.direction == 2):
             return "DOWN"
-        elif (self.direction == 4):
+        elif (self.direction == 3):
             return "LEFT"
     def __repr__(self):
         return str(self)
 
 class Move:
-    UP = Direction(1)
-    RIGHT = Direction(2)
-    DOWN = Direction(3)
-    LEFT = Direction(4)
+    UP = Direction(0)
+    RIGHT = Direction(1)
+    DOWN = Direction(2)
+    LEFT = Direction(3)
+
+    def __bool__(self):
+        return True
+    def __nonzero__(self):
+        return True
 
 def possible_moves(board):
     spaceLoc = find_tile(board, " ")
@@ -122,7 +129,11 @@ def possible_moves(board):
     
     return moves
 
+def invert_move(move_in):
+    return Direction((move_in.direction + 2) % 4)
+
 def do_move(board, move):
+    # Returns the new modified board, and the piece that was moved
     space_loc = find_tile(board, " ")
     x, y = space_loc.x, space_loc.y
     # Move up
@@ -137,7 +148,7 @@ def do_move(board, move):
     # Move Left
     elif (move == Move.LEFT):
         board.board[y][x], board.board[y][x-1] = board.board[y][x-1], board.board[y][x]
-    return board
+    return board, board.board[y][x]
 
 def find_tile(board, target):
     for x in range(board.size):
@@ -191,30 +202,23 @@ def find_in_list(element, list):
 
 # If the opposite of the last action performed is in the potential actions, remove it.
 def remove_backtrack(potential_actions, last_action):
-    if (last_action == Move.UP):
-        action = Move.DOWN
-    elif (last_action == Move.RIGHT):
-        action = Move.LEFT
-    elif (last_action == Move.DOWN):
-        action = Move.UP
-    elif (last_action == Move.LEFT):
-        action = Move.RIGHT
+    action = invert_move(last_action)
     
     for i in range(len(potential_actions)):
-        if (last_action and potential_actions[i] == action):
+        if (potential_actions[i].direction == action.direction):
             del potential_actions[i]
             return
 
-print(Board(3, sys.argv[1:10]))
-print(Board(3, sys.argv[10:]))
 # 3x3 is the only size that seems to work reliably.
-# starting_board = Board(puzzle_size, str(input("Please input starting state (1 character per tile, 0 for blank)")))
-# goal_board = Board(puzzle_size, str(input("Please input the final state desired (1 character per tile, 0 for blank)")))
-# print ("Starting Board")
-# print (starting_board)
-# print ("Goal Board")
-# print (goal_board)
-# agent = Agent(starting_board, goal_board)
-# print ("Trying to solve...")
-# print (agent.solve())
-# print (str(agent.steps) + " nodes expanded")
+starting_board = Board(3, sys.argv[1:10])
+goal_board = Board(3, sys.argv[10:])
+print ("Starting Board")
+print (starting_board)
+print ("Goal Board")
+print (goal_board)
+agent = Agent(starting_board, goal_board)
+print ("Trying to solve...")
+steps = agent.solve()
+for step in steps:
+    print(step)
+print (str(agent.steps) + " nodes expanded")
