@@ -31,7 +31,7 @@ class Agent:
             new_board = copy.deepcopy(node.board)
             new_board, piece_moved = do_move(new_board, move)
             display_moves.append((piece_moved, invert_move(move)))
-            # Total heuristic should account for moves
+            # h(n) + g(n) -> heuristic + length of moves
             new_heuristic = heuristic(new_board, self.goal) + len(new_moves)
             heapq.heappush(self.priority_queue, Node(new_board, new_moves, display_moves, new_heuristic))
 
@@ -209,7 +209,13 @@ def remove_backtrack(potential_actions, last_action):
             del potential_actions[i]
             return
 
-# 3x3 is the only size that seems to work reliably.
+# Detect error where there is no blank.
+if "0" not in sys.argv[1:10]:
+    print ("Starting board doesn't have a blank, did you forget?")
+    sys.exit()
+if "0" not in sys.argv[10:]:
+    print ("Goal board doesn't have a blank, did you forget?")
+    sys.exit()
 starting_board = Board(3, sys.argv[1:10])
 goal_board = Board(3, sys.argv[10:])
 print ("Starting Board")
