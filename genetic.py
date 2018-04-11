@@ -22,7 +22,6 @@ class Gene:
         ((self.genome[5] + self.genome[6])**3) -
         (5 * self.genome[7]**2) + 
         (10 * (self.genome[8] - self.genome[9])**2))
-        # self.fitness = ((4 * self.genome[0]**2) - (2 * self.genome[1]**3) + (9 * self.genome[2]**2) - (11 * self.genome[3]**2) + (5 * self.genome[4]**0.5) + (self.genome[5] + self.genome[6])**3 - (5 * self.genome[7]**2) + 10 * (self.genome[8] - self.genome[9])**2)
 
     def __str__(self):
         return "(" + ", ".join(str(x) for x in self.genome) + ") = " + str(self.fitness)
@@ -56,15 +55,19 @@ class Agent:
         parent1 = None
         parent2 = None
         # Get shift in fitness so everything is either positive or negative depending on minimize or maximize.
-        shift = 0
+        shift = self.population[len(self.population) - 1].fitness
         if self.minimize:
-            for gene in self.population:
-                if gene.fitness > shift:
-                    shift = -gene.fitness
+            shift += 1
+            shift = -shift
+            # for gene in self.population:
+            #     if gene.fitness > shift:
+            #         shift = -gene.fitness
         else:
-            for gene in self.population:
-                if gene.fitness < shift:
-                    shift = -gene.fitness
+            shift -= 1
+            shift = -shift
+            # for gene in self.population:
+            #     if gene.fitness < shift:
+            #         shift = -gene.fitness
         # Get total fitness.
         totalFitness = 0
         for gene in self.population:
@@ -169,10 +172,6 @@ class Agent:
             self.sortPopulation()
         return self.population[0]
 
-
-
-
-# gene = Gene([4, 1, 7, 2, 9, 8, 5, 6, 10, 3])
 populationSize = int(raw_input('Population Size: '))
 mutationProbability = int(raw_input('Mutation Probability (as %): '))
 crossoverProbability = int(raw_input('Crossover Probability (as %): '))
