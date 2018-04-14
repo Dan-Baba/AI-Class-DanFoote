@@ -167,6 +167,8 @@ class Agent:
             self.population.append(child2)
             # Keep population sorted
             self.sortPopulation()
+            # Print current population number and the fitness
+            print(str(generationNum + 1) + ') ' + str(self.population[0]))
         return self.population[0]
 
 
@@ -180,4 +182,4 @@ numberGenerations = int(raw_input('Number of Generations: '))
 minimize = int(raw_input('1 = Minimize function, 2 = Maximize function: ')) == 1
 elitism = int(raw_input('1 = Elitism Replacement, 2 = Replace Parents: ')) == 1
 agent = Agent(populationSize, mutationProbability, crossoverProbability, numberGenerations, minimize, elitism)
-print(agent.solve())
+print('Finished: ' + str(agent.solve()))
