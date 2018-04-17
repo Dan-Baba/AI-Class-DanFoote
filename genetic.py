@@ -140,7 +140,11 @@ class Agent:
         return Gene(childGenome1), Gene(childGenome2)
     
     def resolveDuplicates(self, genome):
+        # Build list of missing genes.
         missingGenes = [gene for gene in [1,2,3,4,5,6,7,8,9,10] if gene not in genome]
+        # Shuffle these genes so they're inserted randomly
+        random.shuffle(missingGenes)
+        # Insert genes that are missing if there are duplicate genes.
         for i in range(0, len(genome)):
             if genome.count(genome[i]) > 1:
                 genome[i] = missingGenes.pop(0)
